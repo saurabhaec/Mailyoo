@@ -1,0 +1,1191 @@
+<?php
+use Zend\Console\Console; //0
+
+$config = array('modules' => array(
+	'ZfcUser',
+	'ZfcBase',
+	'ZfcUser',
+	'BjyAuthorize',
+	'DoctrineModule',
+	'DoctrineORMModule',
+	'Application',
+	'Customer',
+	'Subscription',
+	// 'Social',
+	'Mail',
+	'Bounce',
+	'EdpSuperluminal',
+	// 'Sms',
+	// 'Surveys',
+	// 'Notifications',
+	// 'Webmaster',
+	'Config',
+//	'Plugin',
+//	'Api',
+	'Cron',
+	'Helps',
+	'SlmQueue',
+),
+	'module_listener_options' => array(
+		'module_paths' => array(
+			'./module',
+			'./vendor',
+		),
+		'config_glob_paths' => array(
+			'config/autoload/{{,*.}global,{,*.}local}.php',
+		),
+	), 
+);
+if (Console::isConsole()) {
+	unset($config['modules'][array_search("BjyAuthorize", $config['modules'])]);
+	unset($config['modules'][array_search("Api", $config['modules'])]);
+
+}
+// return $config;
+
+database.global.php
+
+<?php
+return array(
+    'db' => array(
+        'driver'    => 'PdoMysql',
+        'hostname'  => '127.0.0.1',
+        'database'  => 'zfmail',
+        'username'  => 'root',
+        'password'  => 'CGTnmx4wueBdaYW3',
+    ),
+    'service_manager' => array(
+        'factories' => array(
+            'Zend\Db\Adapter\Adapter' => 'Zend\Db\Adapter\AdapterServiceFactory',
+        ),
+    ),
+
+
+);
+
+doctrine.global.php
+
+<?php 
+return array(
+  
+
+    'doctrine' => array(
+        'connection' => array(
+            // default connection name
+            'orm_default' => array(
+                'driverClass' => 'Doctrine\DBAL\Driver\PDOMySql\Driver',
+                'params' => array(
+                    'host'     => '127.0.0.1',
+                    'port'     => '3306',
+                    'user'     => 'root',
+                    'password' => 'CGTnmx4wueBdaYW3',
+                    'dbname'   => 'zfmail',
+                    'driverOptions' => array(
+                        1002 => 'SET NAMES utf8'
+                    ),
+                    'charset'  => 'utf8',
+
+                )
+            )
+        ) ,  
+    ),
+
+
+
+    
+
+  );
+  zfcuser.global.php
+  
+  <?php
+/**
+ * ZfcUser Configuration
+ *
+ * If you have a ./config/autoload/ directory set up for your project, you can
+ * drop this config file in it and change the values as you wish.
+ */
+$settings = array(
+	/**
+	 * Zend\Db\Adapter\Adapter DI Alias
+	 *
+	 * Please specify the DI alias for the configured Zend\Db\Adapter\Adapter
+	 * instance that ZfcUser should use.
+	 */
+	//'zend_db_adapter' => 'Zend\Db\Adapter\Adapter',
+
+	/**
+	 * User Model Entity Class
+	 *
+	 * Name of Entity class to use. Useful for using your own entity class
+	 * instead of the default one provided. Default is ZfcUser\Entity\User.
+	 * The entity class should implement ZfcUser\Entity\UserInterface
+	 */
+	//'user_entity_class' => 'ZfcUser\Entity\User',
+
+	/**
+	 * Enable registration
+	 *
+	 * Allows users to register through the website.
+	 *
+	 * Accepted values: boolean true or false
+	 */
+	'enable_registration' => true,
+
+	/**
+	 * Enable Username
+	 *
+	 * Enables username field on the registration form, and allows users to log
+	 * in using their username OR email address. Default is false.
+	 *
+	 * Accepted values: boolean true or false
+	 */
+	'enable_username' => false,
+
+	/**
+	 * Authentication Adapters
+	 *
+	 * Specify the adapters that will be used to try and authenticate the user
+	 *
+	 * Default value: array containing 'ZfcUser\Authentication\Adapter\Db' with priority 100
+	 * Accepted values: array containing services that implement 'ZfcUser\Authentication\Adapter\ChainableAdapter'
+	 */
+	'auth_adapters' => array(100 => 'ZfcUser\Authentication\Adapter\Db'),
+
+	/**
+	 * Enable Display Name
+	 *
+	 * Enables a display name field on the registration form, which is persisted
+	 * in the database. Default value is false.
+	 *
+	 * Accepted values: boolean true or false
+	 */
+	'enable_display_name' => true,
+
+	/**
+	 * Modes for authentication identity match
+	 *
+	 * Specify the allowable identity modes, in the order they should be
+	 * checked by the Authentication plugin.
+	 *
+	 * Default value: array containing 'email'
+	 * Accepted values: array containing one or more of: email, username
+	 */
+	'auth_identity_fields' => array('email'),
+
+	/**
+	 * Login form timeout
+	 *
+	 * Specify the timeout for the CSRF security field of the login form
+	 * in seconds. Default value is 300 seconds.
+	 *
+	 * Accepted values: positive int value
+	 */
+	'login_form_timeout' => 300,
+
+	/**
+	 * Registration form timeout
+	 *
+	 * Specify the timeout for the CSRF security field of the registration form
+	 * in seconds. Default value is 300 seconds.
+	 *
+	 * Accepted values: positive int value
+	 */
+	'user_form_timeout' => 300,
+
+	/**
+	 * Login After Registration
+	 *
+	 * Automatically logs the user in after they successfully register. Default
+	 * value is false.
+	 *
+	 * Accepted values: boolean true or false
+	 */
+	'login_after_registration' => true,
+
+	/**
+	 * Registration Form Captcha
+	 *
+	 * Determines if a captcha should be utilized on the user registration form.
+	 * Default value is false.
+	 */
+	//'use_registration_form_captcha' => false,
+
+	/**
+	 * Form Captcha Options
+	 *
+	 * Currently used for the registration form, but re-usable anywhere. Use
+	 * this to configure which Zend\Captcha adapter to use, and the options to
+	 * pass to it. The default uses the Figlet captcha.
+	 */
+	/*'form_captcha_options' => array(
+		        'class'   => 'figlet',
+		        'options' => array(
+		            'wordLen'    => 5,
+		            'expiration' => 300,
+		            'timeout'    => 300,
+		        ),
+	*/
+
+	/**
+	 * Use Redirect Parameter If Present
+	 *
+	 * Upon successful authentication, check for a 'redirect' POST or GET parameter
+	 *
+	 * Accepted values: boolean true or false
+	 */
+	'use_redirect_parameter_if_present' => true,
+
+	/**
+	 * Sets the view template for the user login widget
+	 *
+	 * Default value: 'zfc-user/user/login.phtml'
+	 * Accepted values: string path to a view script
+	 */
+	//'user_login_widget_view_template' => 'zfc-user/user/login.phtml',
+
+	/**
+	 * Login Redirect Route
+	 *
+	 * Upon successful login the user will be redirected to the entered route
+	 *
+	 * Default value: 'zfcuser'
+	 * Accepted values: A valid route name within your application
+	 *
+	 */
+	'login_redirect_route' => 'home',
+
+	/**
+	 * Logout Redirect Route
+	 *
+	 * Upon logging out the user will be redirected to the enterd route
+	 *
+	 * Default value: 'zfcuser/login'
+	 * Accepted values: A valid route name within your application
+	 */
+	//'logout_redirect_route' => 'zfcuser/login',
+
+	/**
+	 * Password Security
+	 *
+	 * DO NOT CHANGE THE PASSWORD HASH SETTINGS FROM THEIR DEFAULTS
+	 * Unless A) you have done sufficient research and fully understand exactly
+	 * what you are changing, AND B) you have a very specific reason to deviate
+	 * from the default settings and know what you're doing.
+	 *
+	 * The password hash settings may be changed at any time without
+	 * invalidating existing user accounts. Existing user passwords will be
+	 * re-hashed automatically on their next successful login.
+	 */
+
+	/**
+	 * Password Cost
+	 *
+	 * The number represents the base-2 logarithm of the iteration count used for
+	 * hashing. Default is 14 (about 10 hashes per second on an i5).
+	 *
+	 * Accepted values: integer between 4 and 31
+	 */
+	'password_cost' => 14,
+
+	/**
+	 * Enable user state usage
+	 *
+	 * Should user's state be used in the registration/login process?
+	 */
+	'enable_user_state' => true,
+
+	/**
+	 * Default user state upon registration
+	 *
+	 * What state user should have upon registration?
+	 * Allowed value type: integer
+	 */
+	'default_user_state' => 0,
+
+	/**
+	 * States which are allowing user to login
+	 *
+	 * When user tries to login, is his/her state one of the following?
+	 * Include null if you want user's with no state to login as well.
+	 * Allowed value types: null and integer
+	 */
+	'allowed_login_states' => array(null, 1),
+
+	/**
+	 * User table name
+	 */
+	//'table_name' => 'user',
+
+	/**
+	 * End of ZfcUser configuration
+	 */
+);
+
+/**
+ * You do not need to edit below this line
+ */
+return array(
+	'zfcuser' => $settings,
+	'service_manager' => array(
+		'aliases' => array(
+			'zfcuser_zend_db_adapter' => (isset($settings['zend_db_adapter'])) ? $settings['zend_db_adapter'] : 'Zend\Db\Adapter\Adapter',
+		),
+	),
+);
+
+
+
+module.config.php
+
+
+
+
+
+<?php
+/**
+ * Zend Framework (http://framework.zend.com/).
+ *
+ * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
+ *
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ */
+
+namespace Application;
+
+return array(
+	'router' => array(
+		'routes' => array(
+			'home' => array(
+				'type' => 'Zend\Mvc\Router\Http\Literal',
+				'options' => array(
+					'route' => '/',
+					'defaults' => array(
+						'controller' => 'Application\Controller\Index',
+						'action' => 'index',
+					),
+				),
+			),
+			// The following is a route to simplify getting started creating
+			// new controllers and actions without needing to create a new
+			// module. Simply drop new controllers in, and you can access them
+			// using the path /application/:controller/:action
+			'application' => array(
+				'type' => 'Literal',
+				'options' => array(
+					'route' => '/application',
+					'defaults' => array(
+						'__NAMESPACE__' => 'Application\Controller',
+						'controller' => 'Index',
+						'action' => 'index',
+					),
+				),
+				'may_terminate' => true,
+				'child_routes' => array(
+					'default' => array(
+						'type' => 'Segment',
+						'options' => array(
+							'route' => '/[:controller[/:action]]',
+							'constraints' => array(
+								'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+								'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+							),
+							'defaults' => array(
+							),
+						),
+					),
+				),
+			),
+
+			'campaigns' => array(
+				'type' => 'segment',
+				'options' => array(
+					'route' => '/campaigns[/:action][/:id]',
+					'constraints' => array(
+						'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+						'id' => '[0-9]+',
+					),
+					'defaults' => array(
+						'controller' => 'Application\Controller\Campaigns',
+						'action' => 'index',
+					),
+				),
+			),
+
+		),
+	),
+	'service_manager' => array(
+		'abstract_factories' => array(
+			'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+			'Zend\Log\LoggerAbstractServiceFactory',
+		),
+		'factories' => array(
+			'translator' => 'Zend\Mvc\Service\TranslatorServiceFactory',
+            'configFactory' => 'Application\Service\ConfigFactory',
+			'navigation' => 'Zend\Navigation\Service\DefaultNavigationFactory', // <-- add this
+		),
+
+	),
+
+	'navigation' => array(
+		'default' => array(
+			array(
+				'label' => 'Page',
+				'route' => 'campaigns',
+				'resource' => 'admin',
+				'icon' => 'fa fa-columns',
+				'pages' => array(
+					array(
+						'label' => 'Subscriber Page',
+						'uri' => '/campaigns/subscriber',
+						'icon' => 'fa fa-key',
+					),
+
+					array(
+						'label' => 'Unsubscriber Page',
+						'uri' => '/campaigns/unsubscriber',
+						'icon' => 'fa fa-key',
+					),
+				),
+			),
+		), 
+	),
+
+	'translator' => array(
+		'locale' => 'en_US',
+		'translation_file_patterns' => array(
+			array(
+				'type' => 'gettext',
+				'base_dir' => __DIR__ . '/../language',
+				'pattern' => '%s.mo',
+			),
+		),
+	),
+	'controllers' => array(
+		'invokables' => array(
+			'Application\Controller\Index' => Controller\IndexController::class,
+			'Application\Controller\Campaigns' => 'Application\Controller\CampaignsController',
+		),
+	),
+	'view_manager' => array(
+		'display_not_found_reason' => true,
+		'display_exceptions' => true,
+		'doctype' => 'HTML5',
+		'not_found_template' => 'error/404',
+		'exception_template' => 'error/index',
+		'template_map' => array(
+			'layout/layout' => __DIR__ . '/../view/layout/layout.phtml',
+			'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
+			'error/404' => __DIR__ . '/../view/error/404.phtml',
+			'error/index' => __DIR__ . '/../view/error/index.phtml',
+			'layout/blank' => __DIR__ . '/../view/layout/blank.phtml',
+		),
+		'template_path_stack' => array(
+			'application' => __DIR__ . '/../view',
+			'zfc-user' => __DIR__ . '/../view',
+		),
+	),
+	// Placeholder for console routes
+	'console' => array(
+		'router' => array(
+			'routes' => array(
+			),
+		),
+	),
+
+	// doctrine
+	'doctrine' => array(
+		'driver' => array(
+			'application_entities' => array(
+				'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+				'cache' => 'array',
+				'paths' => array(__DIR__ . '/../src/Application/Entity'),
+			),
+			'orm_default' => array(
+				'drivers' => array(
+					'Application\Entity' => 'application_entities',
+				),
+			)),
+	),
+
+	// BJyAuth
+	'bjyauthorize' => array(
+		'guards' => array(
+
+			'BjyAuthorize\Guard\Controller' => array(
+
+				array('controller' => 'Application\Controller\Index', 'roles' => array('admin', 'user', 'vender', 'analytic', 'editer')),
+
+				array('controller' => 'Application\Controller\Campaigns', 'roles' => array('admin', 'user', 'guest')),
+
+				// array('controller' => 'Application\Controller\Static', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer')) ,
+				// array('controller' => 'Application\Controller\Uploadhandler', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer')) ,
+				// array('controller' => 'Application\Controller\Find', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer')) ,
+
+			),
+			/* If this guard is specified here (i.e. it is enabled), it will block
+				                     * access to all routes unless they are specified here.
+			*/
+			'BjyAuthorize\Guard\Route' => array(
+				array('route' => 'home', 'roles' => array('admin')),
+//				array('route' => 'home', 'roles' => array('admin' , 'editer')),
+				array('route' => 'campaigns', 'roles' => array('admin', 'editer', 'guest')),
+
+				// array('route' => 'redirect_route', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer' )),
+				// array('route' => 'static', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer' )),
+				// array('route' => 'barcode', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer' )),
+				// array('route' => 'uploadhandler', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer' )),
+				// array('route' => 'finder', 'roles' => array('admin' , 'user', 'dps', 'vender' , 'ops' , 'crm' , 'analytic','editer' )),
+
+			),
+
+		),
+	),
+
+);
+
+
+
+
+
+
+<?php
+
+namespace Mail\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/** @ORM\Table(name="report")
+@ORM\Entity(repositoryClass="Mail\Entity\Repository\Report")
+ **/
+class Report {
+	/**
+	 * @var int
+	 * @ORM\Id
+	 * @ORM\Column(type="integer")
+	 * @ORM\GeneratedValue(strategy="AUTO")
+	 */
+	protected $id;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer", length=255,  nullable=true)
+	 */
+	protected $sid;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer", length=255,  nullable=true)
+	 */
+	protected $cid;
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer",    nullable=true)
+	 */
+	protected $status;
+
+
+    /**
+     * @var string
+     * @ORM\Column(type="integer",    nullable=true)
+     */
+    protected $delivery;
+
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer", nullable=true)
+	 */
+	protected $isOpen;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer",  nullable=true)
+	 */
+	protected $isClick;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="integer",  nullable=true)
+	 */
+	protected $isBounce;
+
+    /**
+     * @var string
+     * @ORM\Column(type="integer",  nullable=true)
+     */
+    protected $isSpam;
+
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", length=255, nullable=true)
+	 */
+	protected $ipaddress;
+
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $isUnsubscribe;
+
+
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	protected $latitude;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	protected $longitude;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	protected $ccode;
+
+	/**
+	 * @var string
+	 * @ORM\Column(type="datetime" ,  nullable=true )
+	 */
+	protected $updated;
+
+	public function __get($prop) {
+		return $this->$prop;
+	}
+	/**
+	 * Saves protected properties.
+	 *
+	 * @param string $prop
+	 * @param mixed  $val
+	 */
+	public function __set($prop, $val) {
+		$this->$prop = $val;
+	}
+
+	public function __construct() {
+		$this->updated = new \DateTime();
+	}
+}
+
+
+
+
+
+
+
+<?php
+
+namespace Mail\Entity\Repository;
+
+use Doctrine\ORM\EntityRepository;
+
+/**
+ * AddressRepository
+ * This class was generated by the Doctrine ORM. Add your own custom
+ * repository methods below.
+ */
+class Report extends EntityRepository {
+
+	const UNSUBSCRIBE = -1;
+	const BOUNCED = 1;
+	const SENT = 1;
+
+	/**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function count() {
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select(array('u.id'))
+			->from('Mail\Entity\Report', 'u');
+		$result = $query->getQuery()->getResult();
+
+		return count($result);
+	}
+
+
+    /**
+     * @param  $cid = 0;
+     * @return mixed
+     */
+    public function speed( $cid = 0 ) {
+	    $SQL = "SELECT  ( COUNT(1)/TIMESTAMPDIFF(MINUTE,  min(report.updated) , max(report.updated)))/60 AS rate  FROM report WHERE cid = $cid AND status IN (1,-1)";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($SQL);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+    /**
+     * @param  $cid = 0;
+     * @return mixed
+     */
+    public function pendingCampaigns( $cid = 0 ) {
+        $SQL = "SELECT  COUNT(1) as pending FROM report WHERE cid = $cid AND status IN (1,-1)";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($SQL);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+
+    /**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function totalPeopleReach() {
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select(' COUNT(r.id) as total ')
+			->from('Mail\Entity\Report', 'r')
+			->where('r.status = 1');
+		$total = $query->getQuery()->getSingleScalarResult();
+		return $total;
+	}
+
+	/**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function totalDomain() {
+		$sql = ' SELECT COUNT(  `domain` ) as noofdomain FROM  `view_domain` WHERE 1 LIMIT 1';
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$s = $stmt->execute();
+		return $stmt->fetch();
+	}
+
+	/**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function getGeo() {
+		$sql = ' SELECT  `latitude` ,  `longitude`  FROM  `report`  WHERE `status` = 1  ORDER BY  `report`.`updated` DESC  LIMIT 0 , 100 ';
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$s = $stmt->execute();
+		return $stmt->fetchAll();
+	}
+
+	/**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function getStates() {
+
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select(' COUNT(r.id) as total ')
+			->from('Mail\Entity\Report', 'r');
+		$data['total'] = $query->getQuery()->getSingleScalarResult();
+		unset($query);
+
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select('SUM(r1.status) as send ')
+			->from('Mail\Entity\Report', 'r1')
+			->where('r1.status = 1');
+		$data['send'] = $query->getQuery()->getSingleScalarResult();
+		if (is_null($data['send'])) {$data['send'] = 0;}
+		unset($query);
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select('SUM(r2.isOpen) as open ')
+			->from('Mail\Entity\Report', 'r2')
+			->where('r2.status = 1')
+			->andWhere('r2.isOpen = 0');
+		$data['open'] = $query->getQuery()->getSingleScalarResult();
+		if (is_null($data['open'])) {$data['open'] = 0;}
+		unset($query);
+		$query = $this->getEntityManager()->createQueryBuilder();
+
+		$query->select('SUM(r3.isClick) as click ')
+			->from('Mail\Entity\Report', 'r3')
+			->where('r3.status = 1')
+			->andWhere('r3.isClick > 0');
+		$data['click'] = $query->getQuery()->getSingleScalarResult();
+		if (is_null($data['click'])) {$data['click'] = 0;}
+		unset($query);
+
+
+		$query = $this->getEntityManager()->createQueryBuilder();
+		$query->select('SUM(r4.isBounce) as bounce ')
+			->from('Mail\Entity\Report', 'r4')
+			->where('r4.status = 1')
+			->andWhere('r4.isBounce > 0');
+		$data['bounce'] = $query->getQuery()->getSingleScalarResult();
+        unset($query);
+        if (is_null($data['bounce'])) {$data['bounce'] = 0;}
+
+
+
+        $query = $this->getEntityManager()->createQueryBuilder();
+        $query->select('SUM(r4.delivery) as bounce ')
+            ->from('Mail\Entity\Report', 'r4')
+            ->where('r4.status = 1')
+            ->andWhere('r4.delivery > 0');
+        $data['delivery'] = $query->getQuery()->getSingleScalarResult();
+        unset($query);
+
+
+        $query = $this->getEntityManager()->createQueryBuilder();
+        $query->select('SUM(r4.isSpam) as bounce ')
+            ->from('Mail\Entity\Report', 'r4')
+            ->where('r4.status = 1')
+            ->andWhere('r4.isSpam > 0');
+        $data['spam'] = $query->getQuery()->getSingleScalarResult();
+        unset($query);
+
+        $query = $this->getEntityManager()->createQueryBuilder();
+        $query->select('SUM(r4.isUnsubscribe) as bounce ')
+            ->from('Mail\Entity\Report', 'r4')
+            ->where('r4.status = 1')
+            ->andWhere('r4.isUnsubscribe > 0');
+        $data['unsubscribe'] = $query->getQuery()->getSingleScalarResult();
+
+
+		return $data;
+	}
+	
+    public function getAllReport($id) {
+
+        $sql = "SELECT SUM(status) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE status = 1 AND cid = ".$id."  GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['send'] = $result;
+
+        $sql = "SELECT SUM(isOpen) as no , MONTH(updated) as byMONTH  ,  YEAR(updated) as byYEAR  FROM report WHERE isOpen >= 1  AND cid = ".$id."  GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['open'] = $result;
+
+        $sql = "SELECT SUM(isClick) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE isClick >= 1 AND cid = ".$id."  GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['click'] = $result;
+
+        $sql = "SELECT SUM(isBounce) as no , MONTH(updated) as byMONTH,  YEAR(updated) as byYEAR  FROM report WHERE isBounce >= 1 AND cid = ".$id."  GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['bounce'] = $result;
+        return $data;
+    }
+
+    public function emailReport($id) {
+
+        $sql = "SELECT SUM(status) as send , SUM(isOpen) as open , SUM(isClick) as click ,  SUM(isBounce) as bounce    FROM report WHERE status = 1 AND cid = ".$id;
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        return $result;
+    }
+
+    public function urReport($id) {
+
+
+        $sql = "SELECT SUM(isBounce) as no , MONTH(updated) as byMONTH,  YEAR(updated) as byYEAR  FROM report WHERE isBounce >= 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['bounce'] = $result;
+        return $data;
+    }
+
+    public function ctrReport($id) {
+
+
+        $sql = "SELECT SUM(isClick) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE isClick >= 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['click'] = $result;
+        return $data;
+    }
+
+    public function orReport($id) {
+
+        $sql = "SELECT SUM(isOpen) as no , MONTH(updated) as byMONTH  ,  YEAR(updated) as byYEAR  FROM report WHERE isOpen >= 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['open'] = $result;
+        return $data;
+    }
+
+
+    public function arReport($id) {
+
+
+        $sql = "SELECT SUM(status) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE status = 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['send'] = $result;
+
+        $sql = "SELECT SUM(isOpen) as no , MONTH(updated) as byMONTH  ,  YEAR(updated) as byYEAR  FROM report WHERE isOpen >= 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['open'] = $result;
+        return $data;
+    }
+
+
+    public function brReport($id) {
+
+        $sql = "SELECT SUM(isBounce) as no , MONTH(updated) as byMONTH,  YEAR(updated) as byYEAR  FROM report WHERE isBounce >= 1 AND cid = ".$id." GROUP BY (byMONTH) LIMIT 0, 60";
+        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $data['bounce'] = $result;
+        return $data;
+
+    }
+
+
+	/**
+	 * Counts how many Addresss there are in the database.
+	 *
+	 * @return int
+	 */
+	public function monthlyReport() {
+
+		$sql = "SELECT count(id) as no , MONTH(updated) as byMONTH  ,  YEAR(updated) as byYEAR  FROM report WHERE 1 GROUP BY (byMONTH) LIMIT 0, 60";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		$data['total'] = $result;
+
+		$sql = "SELECT SUM(status) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE status = 1 GROUP BY (byMONTH) LIMIT 0, 60";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		$data['send'] = $result;
+
+		$sql = "SELECT SUM(isOpen) as no , MONTH(updated) as byMONTH  ,  YEAR(updated) as byYEAR  FROM report WHERE isOpen >= 1 GROUP BY (byMONTH) LIMIT 0, 60";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		$data['open'] = $result;
+
+		$sql = "SELECT SUM(isClick) as no , MONTH(updated) as byMONTH ,  YEAR(updated) as byYEAR  FROM report WHERE isClick >= 1 GROUP BY (byMONTH) LIMIT 0, 60";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		$data['click'] = $result;
+
+		$sql = "SELECT SUM(isBounce) as no , MONTH(updated) as byMONTH,  YEAR(updated) as byYEAR  FROM report WHERE isBounce >= 1 GROUP BY (byMONTH) LIMIT 0, 60";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		$data['bounce'] = $result;
+		return $data;
+	}
+
+	public function geographicalReport() {
+		$sql = "SELECT SUM(isOpen) as z , ccode as code   FROM report WHERE 1 GROUP BY (ccode) LIMIT 0, 300";
+		$stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		return $result;
+	}
+
+	/**
+	 * Get paged Addresss.
+	 *
+	 * @return int
+	 */
+	public function addItems($data) {
+		try {
+			$Report = new \Mail\Entity\Report();
+			$Report->__set('sid', $data['sid']);
+			$Report->__set('cid', $data['cid']);
+			$Report->__set('status', $data['status']);
+			$Report->__set('isOpen', $data['isOpen']);
+			$Report->__set('isClick', $data['isClick']);
+			$this->getEntityManager()->persist($Report);
+			$this->getEntityManager()->flush();
+			return true;
+		} catch (\Doctrine\ORM\NoResultException $ee) {
+			return false;
+		} catch (Throwable $t) {
+			return false;
+			// Executed only in PHP 7, will not match in PHP 5.x
+		} catch (Exception $e) {
+			return false;
+			// Executed only in PHP 5.x, will not be reached in PHP 7
+		}
+	}
+
+	public function changeStatusToOpenItems($cid, $sid , $ipAddress = null ) {
+		$Report = $this->getEntityManager()->getRepository('\Mail\Entity\Report')->findOneBy(array('sid' => $sid, 'cid' => $cid));
+		if (count($Report)) {
+
+			$Addressdetails = json_decode(file_get_contents("http://ipinfo.io/".$ipAddress."/json"));
+			$latitudelongitude = explode(',', $Addressdetails->loc); 
+
+			$Report->__set('isOpen', $Report->isOpen + 1);
+			$Report->__set('ipaddress', $ipAddress );
+			$Report->__set('ccode', $Addressdetails->country );  
+			$Report->__set('latitude', $latitudelongitude[0]); 
+			$Report->__set('longitude', $latitudelongitude[1]);  
+			$Report->__set('useragent', $_SERVER['HTTP_USER_AGENT'] );
+
+			$this->getEntityManager()->persist($Report);
+			$this->getEntityManager()->flush();
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function changeStatusToClickItems($cid, $sid , $ipAddress = null ) {
+		$Report = $this->getEntityManager()->getRepository('\Mail\Entity\Report')->findOneBy(array('sid' => $sid, 'cid' => $cid));
+		if (count($Report)) {
+			$Addressdetails = json_decode(file_get_contents("http://ipinfo.io/".$ipAddress."/json"));
+			$latitudelongitude = explode(',', $Addressdetails->loc); 
+			
+			$Report->__set('isClick', $Report->isClick + 1);
+			$Report->__set('ipaddress', $ipAddress ); 
+			$Report->__set('ccode', $Addressdetails->country );  
+			$Report->__set('latitude', $latitudelongitude[0]); 
+			$Report->__set('longitude', $latitudelongitude[1]);  
+			$Report->__set('useragent', $_SERVER['HTTP_USER_AGENT'] );  
+
+			$this->getEntityManager()->persist($Report);
+			$this->getEntityManager()->flush(); 
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function changestatustoFailItems($cid, $sid) {
+		$Report = $this->getEntityManager()->getRepository('Mail\Entity\Report')->findOneBy(array('cid' => $cid, 'sid' => $sid));
+		if (count($Report)) {
+			$Report->__set('status', '-1' );
+            $Report->__set('updated',  new \DateTime() );
+			$this->getEntityManager()->persist($Report);
+			$this->getEntityManager()->flush();
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+    public function changestatustosendItems($cid, $sid) {
+        $Report = $this->getEntityManager()->getRepository('Mail\Entity\Report')->findOneBy(array('cid' => $cid, 'sid' => $sid));
+        if (count($Report)) {
+            $Report->__set('status', 1);
+            $Report->__set('updated',  new \DateTime() );
+            $this->getEntityManager()->persist($Report);
+            $this->getEntityManager()->flush();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+	public function changeStatusToBounce($bounceemails) {
+		$i = 0;
+
+		foreach ($bounceemails as $key => $email) {
+
+			$Subscription = $this->getEntityManager()->getRepository('Subscription\Entity\Subscription')->findOneBy(array('email' => $email, 'status' => 1));
+			if (count($Subscription)) { 
+
+				$Subscription->__set('status', self::UNSUBSCRIBE);
+				$this->getEntityManager()->persist($Subscription);
+				$this->getEntityManager()->flush();
+				$Report = $this->getEntityManager()->getRepository('Mail\Entity\Report')->findOneBy(array('sid' => $Subscription->__get('id')), array('id' => 'DESC'));
+				$Report->__set('isBounce', self::BOUNCED);
+				$this->getEntityManager()->persist($Report);
+				$this->getEntityManager()->flush();
+				$i++; 
+				
+			} 
+		}
+
+		return $i;
+
+	}
+
+	public function updateItems($id, $data) {
+		$Report = $this->getEntityManager()->find('Mail\Entity\Report', $id);
+		if (count($Report)) {
+			$Report->__set('cid', $data['subject']);
+			$Report->__set('status', $data['status']);
+			$Report->__set('isOpen', $data['isOpen']);
+			$Report->__set('isClick', $data['isClick']);
+			$this->getEntityManager()->persist($Report);
+			$this->getEntityManager()->flush();
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function deleteItems($id) {
+		$Campaigns = $this->getEntityManager()->find('Mail\Entity\Report', $id);
+		if (!is_null($Campaigns)) {
+			$this->getEntityManager()->remove($Campaigns);
+			$this->getEntityManager()->flush();
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Get paged Addresss.
+	 *
+	 * @return int
+	 */
+	public function getItems($id) {
+		$Report = $this->getEntityManager()->find('Mail\Entity\Report', $id);
+		$report['id'] = $Report->id;
+		$report['cid'] = $Report->cid;
+		$report['status'] = $Report->status;
+		$report['isOpen'] = $Report->isOpen;
+		$report['isClick'] = $Report->isClick;
+
+		return $report;
+	}
+}
+
+
+
+
+
+
+
+##
+
+$ApiInterface = new \Application\Model\ApiInterface($this->getServiceLocator());
+		$limit = $this->getServiceLocator()->get('Config')['nim_pagination']['data_limit'];
+		$page = (int) $this->params()->fromQuery('page');
+		$offset = ($page == 0) ? 0 : ($page - 1) * $limit;
+		$search = $this->params()->fromQuery('search');
+		$type = 'name';
+        $status = 0; //draft
+        $Campaigns = $ApiInterface->get("Mail\Entity\Campaigns")->getPagedCampaignsSearch($offset, $limit, $type, $search , $status );
+        $this->view->Campaigns = $Campaigns['campaigns'];
+		$this->view->title = 'Campaigns Lists';
+		$this->view->limit = $limit;
+		$this->view->page = $page;
+		$this->view->total = $Campaigns['no_of_lists'];
+		return $this->view;
+    
+
+
